@@ -18,7 +18,8 @@ from .config.inference_config import InferenceConfig
 from .config.crop_config import CropConfig
 from .utils.cropper import Cropper
 from .utils.camera import get_rotation_matrix
-from .utils.video import images2video, concat_frames, get_fps, add_audio_to_video, has_audio_stream
+# from .utils.video import images2video, concat_frames, get_fps, add_audio_to_video, has_audio_stream
+from .utils.video import images2video, get_fps, add_audio_to_video, has_audio_stream
 from .utils.crop import _transform_img, prepare_paste_back, paste_back
 from .utils.io import load_image_rgb, load_video, resize_to_limit, dump, load
 from .utils.helper import mkdir, basename, dct2device, is_video, is_template, remove_suffix, is_image
@@ -352,27 +353,31 @@ class LivePortraitPipeline(object):
         flag_source_has_audio = flag_is_source_video and has_audio_stream(args.source)
         flag_driving_has_audio = (not flag_load_from_template) and has_audio_stream(args.driving)
 
-        ######### build the final concatenation result #########
-        # driving frame | source frame | generation, or source frame | generation
-        if flag_is_source_video:
-            frames_concatenated = concat_frames(driving_rgb_crop_256x256_lst, img_crop_256x256_lst, I_p_lst)
-        else:
-            frames_concatenated = concat_frames(driving_rgb_crop_256x256_lst, [img_crop_256x256], I_p_lst)
-        wfp_concat = osp.join(args.output_dir, f'{basename(args.source)}--{basename(args.driving)}_concat.mp4')
+        #===============K================
 
-        # NOTE: update output fps
-        output_fps = source_fps if flag_is_source_video else output_fps
-        images2video(frames_concatenated, wfp=wfp_concat, fps=output_fps)
+        # ######### build the final concatenation result #########
+        # # driving frame | source frame | generation, or source frame | generation
+        # if flag_is_source_video:
+        #     frames_concatenated = concat_frames(driving_rgb_crop_256x256_lst, img_crop_256x256_lst, I_p_lst)
+        # else:
+        #     frames_concatenated = concat_frames(driving_rgb_crop_256x256_lst, [img_crop_256x256], I_p_lst)
+        # wfp_concat = osp.join(args.output_dir, f'{basename(args.source)}--{basename(args.driving)}_concat.mp4')
 
-        if flag_source_has_audio or flag_driving_has_audio:
-            # final result with concatenation
-            wfp_concat_with_audio = osp.join(args.output_dir, f'{basename(args.source)}--{basename(args.driving)}_concat_with_audio.mp4')
-            # audio_from_which_video = args.source if flag_source_has_audio else args.driving # default source audio
-            audio_from_which_video = args.driving if flag_driving_has_audio else args.source # default driving audio
-            log(f"Audio is selected from {audio_from_which_video}, concat mode")
-            add_audio_to_video(wfp_concat, audio_from_which_video, wfp_concat_with_audio)
-            os.replace(wfp_concat_with_audio, wfp_concat)
-            log(f"Replace {wfp_concat} with {wfp_concat_with_audio}")
+        # # NOTE: update output fps
+        # output_fps = source_fps if flag_is_source_video else output_fps
+        # images2video(frames_concatenated, wfp=wfp_concat, fps=output_fps)
+
+        # if flag_source_has_audio or flag_driving_has_audio:
+        #     # final result with concatenation
+        #     wfp_concat_with_audio = osp.join(args.output_dir, f'{basename(args.source)}--{basename(args.driving)}_concat_with_audio.mp4')
+        #     # audio_from_which_video = args.source if flag_source_has_audio else args.driving # default source audio
+        #     audio_from_which_video = args.driving if flag_driving_has_audio else args.source # default driving audio
+        #     log(f"Audio is selected from {audio_from_which_video}, concat mode")
+        #     add_audio_to_video(wfp_concat, audio_from_which_video, wfp_concat_with_audio)
+        #     os.replace(wfp_concat_with_audio, wfp_concat)
+        #     log(f"Replace {wfp_concat} with {wfp_concat_with_audio}")
+
+        #===============K================
 
         # save the animated result
         wfp = osp.join(args.output_dir, f'{basename(args.source)}--{basename(args.driving)}.mp4')
@@ -397,4 +402,7 @@ class LivePortraitPipeline(object):
         log(f'Animated video: {wfp}')
         log(f'Animated video with concat: {wfp_concat}')
 
-        return wfp, wfp_concat
+        # return wfp, wfp_concat
+        return wfp
+
+
